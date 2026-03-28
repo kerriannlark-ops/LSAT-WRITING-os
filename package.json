@@ -1,0 +1,16 @@
+{
+  "name": "kerri-lsat-writing-os",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Project-local Playwright smoke tooling for the LSAT Writing course app.",
+  "scripts": {
+    "install:browsers": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright install chromium webkit",
+    "test:smoke": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test tests/interactive.spec.js",
+    "test:all": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test",
+    "test:headed": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test --headed --project=chromium",
+    "test:update": "PLAYWRIGHT_BROWSERS_PATH=.playwright-browsers playwright test --update-snapshots"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.54.2"
+  }
+}
