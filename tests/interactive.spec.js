@@ -70,6 +70,38 @@ test.describe('Interactive practice smoke', () => {
     await expect(page.locator('#sim-writing-directions-panel')).toBeVisible();
   });
 
+  test('shows a five-minute warning and locks editing when time expires', async ({ page }) => {
+    await openInteractivePracticeView(page);
+
+    await page.evaluate(() => {
+      localStorage.setItem('simStage', 'writing');
+      localStorage.setItem('simViewMode', 'directions');
+      localStorage.setItem('simTimerPhase', 'writing');
+      localStorage.setItem('simTimerDuration', '600');
+      localStorage.setItem('simTimerRemaining', '300');
+      localStorage.setItem('simTimerEndTime', '0');
+      localStorage.setItem('simTimerRunning', 'false');
+      localStorage.setItem('simTimedSessionExpired', 'false');
+      localStorage.setItem('simExpiredPhase', '');
+    });
+    await page.goto('/?view=practice&stage=writing', { waitUntil: 'domcontentloaded' });
+
+    await expect(page.locator('#sim-stage-writing.active')).toBeVisible();
+    await expect(page.locator('#sim-writing-warning')).toHaveClass(/visible/);
+    await expect(page.locator('#sim-writing-warning')).toContainText('05:00');
+
+    await page.evaluate(() => {
+      localStorage.setItem('simTimedSessionExpired', 'true');
+      localStorage.setItem('simExpiredPhase', 'writing');
+    });
+    await page.goto('/?view=practice&stage=writing', { waitUntil: 'domcontentloaded' });
+
+    await expect(page.locator('#sim-time-expired-overlay')).toHaveClass(/visible/);
+    await expect(page.locator('#sim-submit-essay')).toBeDisabled();
+    await expect(page.locator('#sim-essay-mirror')).toHaveAttribute('contenteditable', 'false');
+    await expect(page.locator('#sim-scratchpad-mirror')).toHaveJSProperty('readOnly', true);
+  });
+
   test('reset clears only the current prompt state and unlocks exam mode', async ({ page }) => {
     await openInteractiveCourseView(page);
 
@@ -105,17 +137,18 @@ test.describe('Interactive practice smoke', () => {
 
     await page.locator('#sim-stage-prewrite.active button[data-highlight-color="pink"]').click();
     await expect(page.locator('#sim-stage-prewrite.active button[data-highlight-color="pink"]')).toHaveClass(/active/);
-    await setPromptTextSelection(page, '#sim-question-pane', 'practical skills necessary to succeed');
+    await setPromptTextSelection(page, '#sim-question-pane', 'failed to provide students with the practical skills necessary to succeed in an increasingly competitive and career focused society');
     await expect(page.locator('#sim-question-pane mark.lawhub-highlight-pink')).toHaveCount(1);
+    await expect(page.locator('#sim-question-pane mark.lawhub-highlight-pink')).toHaveText('failed to provide students with the practical skills necessary to succeed in an increasingly competitive and career focused society');
     await expect(page.locator('#sim-stage-prewrite.active button[data-highlight-color="pink"]')).toHaveClass(/active/);
-    await setPromptTextSelection(page, '#sim-question-pane', 'career focused society');
+    await setPromptTextSelection(page, '#sim-question-pane', 'trends in the economy');
     await expect(page.locator('#sim-question-pane mark.lawhub-highlight-pink')).toHaveCount(2);
 
     await page.locator('#sim-stage-prewrite.active button[data-highlight-clear="selection"]').click();
     await expect(page.locator('#sim-stage-prewrite.active button[data-highlight-clear="selection"]')).toHaveClass(/active/);
-    await setPromptTextSelection(page, '#sim-question-pane', 'practical skills necessary to succeed');
+    await setPromptTextSelection(page, '#sim-question-pane', 'failed to provide students with the practical skills necessary to succeed in an increasingly competitive and career focused society');
     await expect(page.locator('#sim-question-pane mark.lawhub-highlight-pink')).toHaveCount(1);
-    await setPromptTextSelection(page, '#sim-question-pane', 'career focused society');
+    await setPromptTextSelection(page, '#sim-question-pane', 'trends in the economy');
     await expect(page.locator('#sim-question-pane mark.lawhub-highlight-pink')).toHaveCount(0);
 
     await page.locator('#sim-stage-prewrite.active button[data-highlight-color="underline"]').click();

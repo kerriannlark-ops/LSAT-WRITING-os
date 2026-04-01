@@ -1,4 +1,4 @@
-const CACHE_NAME = "kerri-lsat-course-v22";
+const CACHE_NAME = "kerri-lsat-course-v24";
 const APP_SHELL = [
   "./",
   "./index.html",

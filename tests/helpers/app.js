@@ -41,6 +41,8 @@ async function setPromptTextSelection(page, selector, snippet) {
         const selection = window.getSelection();
         selection.removeAllRanges();
         selection.addRange(range);
+        document.dispatchEvent(new Event('selectionchange'));
+        root.dispatchEvent(new MouseEvent('mouseup', { bubbles: true }));
         return;
       }
     }
